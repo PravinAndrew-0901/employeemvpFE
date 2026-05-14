@@ -27,6 +27,9 @@ import TicketSupport from './pages/TicketSupport';
 import AttendanceLog from './pages/AttendanceLog';
 import NoticeBoard from './pages/NoticeBoard';
 import PerformanceReview from './pages/PerformanceReview';
+import AssetManagement from './pages/AssetManagement';
+import ExpenseTracker from './pages/ExpenseTracker';
+import ProjectPortal from './pages/ProjectPortal';
 
 // System Pages
 import RolesList from './pages/RolesList';
@@ -67,8 +70,13 @@ function App() {
             <Route path="/leaves" element={<LeaveManagement />} />
             <Route path="/performance" element={<PerformanceReview />} />
             
-            {/* Finance & Operations Modules */}
+            {/* Operations & Finance Modules */}
             <Route path="/payroll" element={<RequirePermission permission="manage_payroll"><PayrollList /></RequirePermission>} />
+            <Route path="/expenses" element={<ExpenseTracker />} />
+            <Route path="/assets" element={<RequirePermission permission="manage_assets"><AssetManagement /></RequirePermission>} />
+            <Route path="/projects" element={<ProjectPortal />} />
+
+            {/* Communication Modules */}
             <Route path="/tickets" element={<TicketSupport />} />
             <Route path="/announcements" element={<NoticeBoard />} />
             <Route path="/reports-center" element={<RequirePermission permission="view_reports"><div className="p-10 font-black text-2xl uppercase tracking-tighter">Reports Center <span className="text-blue-500">Coming Soon</span></div></RequirePermission>} />

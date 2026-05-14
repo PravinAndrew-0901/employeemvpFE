@@ -6,7 +6,8 @@ import {
     LayoutDashboard, Users, UploadCloud, Settings, LogOut, 
     Briefcase, UserCog, Sun, Moon, Sliders, Shield, 
     UserCheck, CreditCard, CalendarClock, MessageSquareText, 
-    PieChart, Network, Building2, Ticket, Megaphone, Target, Timer
+    PieChart, Network, Building2, Ticket, Megaphone, Target, Timer,
+    Laptop, Wallet, Rocket
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -35,9 +36,17 @@ const AdminLayout = () => {
             ]
         },
         {
-            label: 'Finance & Operations',
+            label: 'Operations & Finance',
             items: [
                 { path: '/payroll', label: 'Payroll & Slips', icon: CreditCard, permission: 'manage_payroll' },
+                { path: '/expenses', label: 'Expense Claims', icon: Wallet, permission: null },
+                { path: '/assets', label: 'Asset Inventory', icon: Laptop, permission: 'manage_assets' },
+                { path: '/projects', label: 'Project Portal', icon: Rocket, permission: null },
+            ]
+        },
+        {
+            label: 'Communication',
+            items: [
                 { path: '/tickets', label: 'Internal Helpdesk', icon: Ticket, permission: null },
                 { path: '/announcements', label: 'Notice Board', icon: Megaphone, permission: null },
                 { path: '/reports-center', label: 'Reports Center', icon: PieChart, permission: 'view_reports' },
