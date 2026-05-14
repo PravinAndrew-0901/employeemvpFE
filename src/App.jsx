@@ -24,6 +24,9 @@ import StaffList from './pages/StaffList';
 import PayrollList from './pages/PayrollList';
 import LeaveManagement from './pages/LeaveManagement';
 import TicketSupport from './pages/TicketSupport';
+import AttendanceLog from './pages/AttendanceLog';
+import NoticeBoard from './pages/NoticeBoard';
+import PerformanceReview from './pages/PerformanceReview';
 
 // System Pages
 import RolesList from './pages/RolesList';
@@ -60,11 +63,14 @@ function App() {
             
             {/* HR Modules */}
             <Route path="/staff" element={<RequirePermission permission="manage_users"><StaffList /></RequirePermission>} />
+            <Route path="/attendance" element={<AttendanceLog />} />
             <Route path="/leaves" element={<LeaveManagement />} />
+            <Route path="/performance" element={<PerformanceReview />} />
             
             {/* Finance & Operations Modules */}
             <Route path="/payroll" element={<RequirePermission permission="manage_payroll"><PayrollList /></RequirePermission>} />
             <Route path="/tickets" element={<TicketSupport />} />
+            <Route path="/announcements" element={<NoticeBoard />} />
             <Route path="/reports-center" element={<RequirePermission permission="view_reports"><div className="p-10 font-black text-2xl uppercase tracking-tighter">Reports Center <span className="text-blue-500">Coming Soon</span></div></RequirePermission>} />
             <Route path="/positions" element={<RequirePermission permission="manage_settings"><div className="p-10 font-black text-2xl uppercase tracking-tighter">Org Structure & Positions <span className="text-blue-500">Coming Soon</span></div></RequirePermission>} />
 
