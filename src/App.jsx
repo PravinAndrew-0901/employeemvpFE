@@ -4,19 +4,31 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import RequirePermission from './components/rbac/RequirePermission';
 import AdminLayout from './components/layout/AdminLayout';
+
+// Core Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
-import CandidateRegistration from './pages/CandidateRegistration';
 import Dashboard from './pages/Dashboard';
+import CandidateRegistration from './pages/CandidateRegistration';
+
+// Recruitment Pages
 import CandidateList from './pages/CandidateList';
 import JobsList from './pages/JobsList';
 import CandidateDetails from './pages/CandidateDetails';
 import Upload from './pages/Upload';
+import PublicJobs from './pages/PublicJobs';
+import CandidatePortal from './pages/CandidatePortal';
+
+// HR & Enterprise Pages
+import StaffList from './pages/StaffList';
+import PayrollList from './pages/PayrollList';
+import LeaveManagement from './pages/LeaveManagement';
+import TicketSupport from './pages/TicketSupport';
+
+// System Pages
 import RolesList from './pages/RolesList';
 import UserList from './pages/UserList';
 import SystemSettings from './pages/SystemSettings';
-import PublicJobs from './pages/PublicJobs';
-import CandidatePortal from './pages/CandidatePortal';
 
 function App() {
   return (
@@ -29,7 +41,7 @@ function App() {
           <Route path="/register" element={<CandidateRegistration />} />
           <Route path="/job-list" element={<PublicJobs />} />
           
-          {/* Admin / HR Routes */}
+          {/* Admin / Corporate / HR Layout */}
           <Route element={<AdminLayout />}>
             <Route 
               path="/dashboard" 
@@ -39,65 +51,30 @@ function App() {
                 </RequirePermission>
               } 
             />
-            <Route 
-              path="/jobs" 
-              element={
-                <RequirePermission permission="view_candidates">
-                  <JobsList />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/candidates" 
-              element={
-                <RequirePermission permission="view_candidates">
-                  <CandidateList />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/candidates/:id" 
-              element={
-                <RequirePermission permission="view_candidates">
-                  <CandidateDetails />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/upload" 
-              element={
-                <RequirePermission permission="bulk_upload_cv">
-                  <Upload />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/roles" 
-              element={
-                <RequirePermission permission="manage_roles">
-                  <RolesList />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/users" 
-              element={
-                <RequirePermission permission="manage_users">
-                  <UserList />
-                </RequirePermission>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <RequirePermission permission="manage_settings">
-                  <SystemSettings />
-                </RequirePermission>
-              } 
-            />
+            
+            {/* Recruitment Modules */}
+            <Route path="/jobs" element={<RequirePermission permission="view_candidates"><JobsList /></RequirePermission>} />
+            <Route path="/candidates" element={<RequirePermission permission="view_candidates"><CandidateList /></RequirePermission>} />
+            <Route path="/candidates/:id" element={<RequirePermission permission="view_candidates"><CandidateDetails /></RequirePermission>} />
+            <Route path="/upload" element={<RequirePermission permission="bulk_upload_cv"><Upload /></RequirePermission>} />
+            
+            {/* HR Modules */}
+            <Route path="/staff" element={<RequirePermission permission="manage_users"><StaffList /></RequirePermission>} />
+            <Route path="/leaves" element={<LeaveManagement />} />
+            
+            {/* Finance & Operations Modules */}
+            <Route path="/payroll" element={<RequirePermission permission="manage_payroll"><PayrollList /></RequirePermission>} />
+            <Route path="/tickets" element={<TicketSupport />} />
+            <Route path="/reports-center" element={<RequirePermission permission="view_reports"><div className="p-10 font-black text-2xl uppercase tracking-tighter">Reports Center <span className="text-blue-500">Coming Soon</span></div></RequirePermission>} />
+            <Route path="/positions" element={<RequirePermission permission="manage_settings"><div className="p-10 font-black text-2xl uppercase tracking-tighter">Org Structure & Positions <span className="text-blue-500">Coming Soon</span></div></RequirePermission>} />
+
+            {/* System Admin Modules */}
+            <Route path="/users" element={<RequirePermission permission="manage_users"><UserList /></RequirePermission>} />
+            <Route path="/roles" element={<RequirePermission permission="manage_roles"><RolesList /></RequirePermission>} />
+            <Route path="/settings" element={<RequirePermission permission="manage_settings"><SystemSettings /></RequirePermission>} />
           </Route>
 
-          {/* Candidate Portal Route */}
+          {/* Candidate Specific Portal */}
           <Route path="/portal" element={<CandidatePortal />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
