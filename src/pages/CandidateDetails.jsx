@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import { ChevronLeft, User, Phone, Mail, MapPin, Briefcase, Calendar, MessageSquare, Clock, CheckCircle, FileText } from 'lucide-react';
+import { 
+    ChevronLeft, User, Phone, Mail, MapPin, Briefcase, 
+    Calendar, MessageSquare, Clock, CheckCircle, FileText, 
+    UserPlus, X, DollarSign, Building2, ShieldCheck
+} from 'lucide-react';
 
 const CANDIDATE_STATUSES = [
     'New', 'Profile Reviewed', 'Shortlisted', 'Rejected', 'Duplicate',
@@ -11,6 +15,7 @@ const CANDIDATE_STATUSES = [
 
 const CandidateDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [candidate, setCandidate] = useState(null);
     const [followUps, setFollowUps] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,8 +31,22 @@ const CandidateDetails = () => {
     });
     const [followUpAdding, setFollowUpAdding] = useState(false);
 
+    // Hiring Modal States
+    const [showHireModal, setShowHireModal] = useState(false);
+    const [departments, setDepartments] = useState([]);
+    const [designations, setDesignations] = useState([]);
+    const [hiringData, setHiringData] = useState({
+        employee_code: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
+        department_id: '',
+        designation_id: '',
+        base_salary: '',
+        joining_date: new Date().toISOString().split('T')[0]
+    });
+    const [hiring, setHiring] = useState(false);
+
     useEffect(() => {
         fetchData();
+        fetchOrgData();
     }, [id]);
 
     const fetchData = async () => {
@@ -47,16 +66,55 @@ const CandidateDetails = () => {
         }
     };
 
+    const fetchOrgData = async () => {
+        try {
+            const [deptRes, desigRes] = await Promise.all([
+                api.get('/settings/departments'),
+                api.get('/settings/designations')
+            ]);
+            setDepartments(deptRes.data);
+            setDesignations(desigRes.data);
+        } catch (err) {
+            console.error("Failed to fetch org data", err);
+        }
+    };
+
     const handleStatusUpdate = async () => {
         try {
             setStatusUpdating(true);
             await api.put(`/candidates/${id}/status`, { status: newStatus });
             setCandidate(prev => ({ ...prev, status: newStatus }));
+            if (newStatus === 'Joined') {
+                // If manually set to joined, maybe prompt hire? 
+                // Better to use the dedicated Hire button
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to update status");
         } finally {
             setStatusUpdating(false);
+        }
+    };
+
+    const handleHire = async (e) => {
+        e.preventDefault();
+        try {
+            setHiring(true);
+            const payload = {
+                candidate_id: parseInt(id),
+                ...hiringData,
+                base_salary: parseFloat(hiringData.base_salary),
+                joining_date: new Date(hiringData.joining_date).toISOString()
+            };
+            await api.post('/employees/hire', payload);
+            alert("Candidate successfully hired and employee record created!");
+            setShowHireModal(false);
+            navigate('/staff');
+        } catch (err) {
+            console.error(err);
+            alert("Failed to hire candidate. Check if employee code is unique.");
+        } finally {
+            setHiring(false);
         }
     };
 
@@ -91,15 +149,126 @@ const CandidateDetails = () => {
 
     return (
         <div className="w-full h-full relative z-10 pb-10">
-            <div className="max-w-7xl mx-auto pb-4 relative z-10">
-                <div className="flex items-center space-x-4 mb-8">
-                    <Link to="/candidates" className="p-3 rounded-2xl bg-[var(--panel-bg)] hover:bg-blue-500/10 border border-[var(--border-color)] transition-all group">
-                        <ChevronLeft className="h-5 w-5 text-[var(--muted-text)] group-hover:text-blue-500 group-hover:-translate-x-1 transition-all" />
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tight">Candidate Profile</h1>
-                        <p className="text-[var(--muted-text)] font-medium">Detailed view and pipeline tracking</p>
+            {/* Hire Modal */}
+            {showHireModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="glass-panel w-full max-w-xl rounded-[2.5rem] p-10 border border-blue-500/30 bg-[var(--panel-bg)] shadow-2xl relative">
+                        <button onClick={() => setShowHireModal(false)} className="absolute top-8 right-8 p-2 hover:bg-rose-500/10 hover:text-rose-500 transition-colors rounded-xl text-[var(--muted-text)]">
+                            <X className="h-6 w-6" />
+                        </button>
+
+                        <div className="flex items-center mb-10">
+                            <div className="h-14 w-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white mr-5 shadow-lg shadow-blue-600/30">
+                                <UserPlus className="h-7 w-7" />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black tracking-tight">Hire Candidate</h3>
+                                <p className="text-sm font-bold text-[var(--muted-text)] uppercase tracking-widest text-blue-500/70">Convert {candidate.full_name} to Employee</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleHire} className="space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-[var(--muted-text)] uppercase mb-2 tracking-widest">Employee Code</label>
+                                    <input 
+                                        required
+                                        type="text"
+                                        value={hiringData.employee_code}
+                                        onChange={e => setHiringData({...hiringData, employee_code: e.target.value})}
+                                        className="w-full px-5 py-4 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-2xl font-bold shadow-inner"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-[var(--muted-text)] uppercase mb-2 tracking-widest">Joining Date</label>
+                                    <input 
+                                        required
+                                        type="date"
+                                        value={hiringData.joining_date}
+                                        onChange={e => setHiringData({...hiringData, joining_date: e.target.value})}
+                                        className="w-full px-5 py-4 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-2xl font-bold shadow-inner"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-[var(--muted-text)] uppercase mb-2 tracking-widest">Department</label>
+                                    <select 
+                                        required
+                                        value={hiringData.department_id}
+                                        onChange={e => setHiringData({...hiringData, department_id: e.target.value})}
+                                        className="w-full px-5 py-4 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-2xl font-bold shadow-inner"
+                                    >
+                                        <option value="">Select Dept</option>
+                                        {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-[var(--muted-text)] uppercase mb-2 tracking-widest">Designation</label>
+                                    <select 
+                                        required
+                                        value={hiringData.designation_id}
+                                        onChange={e => setHiringData({...hiringData, designation_id: e.target.value})}
+                                        className="w-full px-5 py-4 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-2xl font-bold shadow-inner"
+                                    >
+                                        <option value="">Select Role</option>
+                                        {designations.map(d => <option key={d.id} value={d.id}>{d.title}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-black text-[var(--muted-text)] uppercase mb-2 tracking-widest">Base Salary (Annual)</label>
+                                <div className="relative">
+                                    <DollarSign className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-text)]" />
+                                    <input 
+                                        required
+                                        type="number"
+                                        placeholder="e.g. 75000"
+                                        value={hiringData.base_salary}
+                                        onChange={e => setHiringData({...hiringData, base_salary: e.target.value})}
+                                        className="w-full pl-12 pr-6 py-4 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-2xl font-bold shadow-inner"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={hiring}
+                                    className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/30 flex items-center justify-center transition-all"
+                                >
+                                    <ShieldCheck className="h-5 w-5 mr-3" />
+                                    {hiring ? 'Processing...' : 'Complete Hire & Create Profile'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
+                </div>
+            )}
+
+            <div className="max-w-7xl mx-auto pb-4 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
+                    <div className="flex items-center space-x-4">
+                        <Link to="/candidates" className="p-3 rounded-2xl bg-[var(--panel-bg)] hover:bg-blue-500/10 border border-[var(--border-color)] transition-all group">
+                            <ChevronLeft className="h-5 w-5 text-[var(--muted-text)] group-hover:text-blue-500 group-hover:-translate-x-1 transition-all" />
+                        </Link>
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tight">Candidate Profile</h1>
+                            <p className="text-[var(--muted-text)] font-medium">Detailed view and pipeline tracking</p>
+                        </div>
+                    </div>
+
+                    {(candidate.status === 'Selected' || candidate.status === 'Offer Released') && (
+                        <button 
+                            onClick={() => setShowHireModal(true)}
+                            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 flex items-center transition-all animate-bounce-subtle"
+                        >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Hire Candidate
+                        </button>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
