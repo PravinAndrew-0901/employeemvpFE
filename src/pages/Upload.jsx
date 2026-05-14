@@ -51,11 +51,11 @@ const Upload = () => {
                         <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <UploadCloud className="h-20 w-20 text-emerald-500/30 group-hover:text-emerald-500 mx-auto mb-6 transition-all group-hover:scale-110" />
                         <h3 className="text-2xl font-black mb-2 relative z-10">Drag & Drop CVs</h3>
-                        <p className="text-[var(--muted-text)] font-bold relative z-10">or click to browse from your computer (PDF only)</p>
+                        <p className="text-[var(--muted-text)] font-bold relative z-10">or click to browse from your computer (PDF or ZIP)</p>
                         <input 
                             type="file" 
                             multiple 
-                            accept=".pdf" 
+                            accept=".pdf,.zip" 
                             className="hidden" 
                             ref={fileInputRef}
                             onChange={handleFileChange}
